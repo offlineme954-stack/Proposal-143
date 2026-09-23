@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080712">
+<title>একটু শোনো…</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden}
+body{
+  font-family:"Noto Sans Bengali","Hind Siliguri","Nirmala UI",system-ui,sans-serif;
+  color:#fff;background:#070610;
+}
+body:before,body:after{
+  content:"";position:fixed;inset:-30%;pointer-events:none;z-index:-3;
+  background:
+    radial-gradient(circle at 25% 25%,rgba(255,75,154,.22),transparent 24%),
+    radial-gradient(circle at 78% 70%,rgba(117,82,255,.22),transparent 26%);
+  filter:blur(20px);animation:ambient 12s ease-in-out infinite alternate;
+}
+body:after{animation-delay:-5s;transform:scale(1.15);opacity:.65}
+@keyframes ambient{to{transform:translate(5%,-3%) scale(1.08)}}
+
+canvas{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:4}
+
+.shell{
+  width:100%;height:100%;display:grid;place-items:center;padding:18px;
+}
+.card{
+  position:relative;width:min(760px,94vw);height:min(720px,92vh);
+  min-height:500px;overflow:hidden;border-radius:34px;
+  border:1px solid rgba(255,255,255,.14);
+  background:linear-gradient(145deg,rgba(255,255,255,.105),rgba(255,255,255,.035));
+  box-shadow:0 30px 100px rgba(0,0,0,.58),inset 0 1px rgba(255,255,255,.12);
+  backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+}
+.card:before{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(120deg,transparent 25%,rgba(255,255,255,.08),transparent 45%);
+  transform:translateX(-120%);animation:sweep 7s linear infinite;
+}
+@keyframes sweep{to{transform:translateX(120%)}}
+
+.orb{position:absolute;border-radius:50%;filter:blur(34px);opacity:.38;pointer-events:none}
+.o1{width:190px;height:190px;background:#ff3f92;top:-90px;left:-70px}
+.o2{width:210px;height:210px;background:#7655ff;right:-90px;bottom:-100px}
+
+.content{
+  position:absolute;inset:0;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;text-align:center;padding:34px 25px;
+}
+.badge{
+  font-size:12px;letter-spacing:3px;color:#cfc8da;
+  text-transform:uppercase;margin-bottom:18px;
+}
+h1{
+  margin:0;font-size:clamp(30px,8vw,58px);line-height:1.18;
+  font-weight:800;text-shadow:0 0 30px rgba(255,95,175,.2);
+}
+.lead{
+  max-width:590px;margin:20px auto 0;color:#dcd6e4;
+  font-size:clamp(16px,4.3vw,21px);line-height:1.9;
+}
+.start{
+  margin-top:30px;border:1px solid rgba(255,255,255,.18);color:#fff;
+  padding:15px 28px;border-radius:999px;font-size:17px;font-weight:800;
+  background:linear-gradient(135deg,#ff3f91,#7859ff);
+  box-shadow:0 12px 38px rgba(182,70,176,.38);
+  cursor:pointer;transition:.25s transform,.25s box-shadow;
+}
+.start:active{transform:scale(.96)}
+.start:hover{transform:translateY(-3px);box-shadow:0 18px 48px rgba(182,70,176,.5)}
+
+#story{display:none;width:100%;max-width:650px}
+.storyText{
+  min-height:205px;display:grid;place-items:center;
+  font-size:clamp(23px,6vw,38px);font-weight:700;line-height:1.75;
+}
+.cursor{border-right:2px solid #fff;animation:blink .7s infinite}
+@keyframes blink{50%{border-color:transparent}}
+
+.nums{display:flex;gap:14px;justify-content:center;align-items:center;margin-top:6px}
+.num{
+  font-family:Arial,sans-serif;font-size:clamp(60px,17vw,100px);font-weight:900;
+  line-height:1;color:#fff;
+  text-shadow:0 0 12px rgba(255,255,255,.55),0 0 38px rgba(255,70,170,.65);
+  animation:float 1.35s ease-in-out infinite;
+}
+.num:nth-child(2){animation-delay:.16s}.num:nth-child(3){animation-delay:.32s}
+@keyframes float{0%,100%{transform:translateY(0) scale(1)}
+50%{transform:translateY(-16px) scale(1.08)}}
+
+.answer{
+  display:inline-flex;align-items:center;justify-content:center;
+  margin-top:30px;padding:14px 25px;border-radius:999px;
+  color:#fff;text-decoration:none;font-weight:800;font-size:16px;
+  background:rgba(255,255,255,.09);
+  border:1px solid rgba(255,255,255,.17);
+  box-shadow:0 10px 30px rgba(0,0,0,.22);
+  transition:.25s;
+}
+.answer:hover{background:rgba(255,255,255,.16);transform:translateY(-2px)}
+.note{font-size:12px;color:#9e97aa;margin-top:13px}
+
+.progress{
+  position:absolute;left:25px;right:25px;bottom:20px;height:3px;
+  border-radius:9px;background:rgba(255,255,255,.08);overflow:hidden;
+}
+.bar{height:100%;width:0;background:linear-gradient(90deg,#ff4c98,#8664ff);transition:width .6s}
+
+@media(max-height:650px){
+ .card{height:94vh}.content{padding:20px}.lead{margin-top:10px}.start{margin-top:18px}
+ .storyText{min-height:150px}
+}
+</style>
+</head>
+<body>
+<canvas id="fx"></canvas>
+
+<div class="shell">
+  <div class="card">
+    <div class="orb o1"></div><div class="orb o2"></div>
+
+    <div class="content" id="intro">
+      <div class="badge">একটি ছোট্ট বার্তা</div>
+      <h1>একটু শোনো…</h1>
+      <div class="lead">কিছু কথা আছে। ধীরে ধীরে পড়ো—শেষ পর্যন্ত গেলে পুরো কথাটা দেখতে পাবে।</div>
+      <button class="start" id="start">শুরু করি ✨</button>
+    </div>
+
+    <div class="content" id="story">
+      <div class="storyText" id="text"></div>
+      <div class="nums" id="nums" style="display:none">
+        <span class="num">1</span><span class="num">4</span><span class="num">3</span>
+      </div>
+      <a class="answer" href="https://m.me/si.md.atikul.islam" target="_blank" rel="noopener">
+        উত্তরটি Messenger-এ জানান
+      </a>
+      <div class="note">নিজের মতামত নিজের মতো করে জানাতে পারো।</div>
+    </div>
+
+    <div class="progress"><div class="bar" id="bar"></div></div>
+  </div>
+</div>
+
+<script>
+const canvas=document.getElementById("fx"),ctx=canvas.getContext("2d");
+let W,H,flowers=[],running=false;
+
+function resize(){
+  W=canvas.width=innerWidth*devicePixelRatio;
+  H=canvas.height=innerHeight*devicePixelRatio;
+  canvas.style.width=innerWidth+"px";canvas.style.height=innerHeight+"px";
+  ctx.setTransform(devicePixelRatio,0,0,devicePixelRatio,0,0);
+  W=innerWidth;H=innerHeight;
+}
+addEventListener("resize",resize);resize();
+
+const glyphs=["🌸","🌷","🌺","✦","✧","❀"];
+function rain(count=90){
+  for(let i=0;i<count;i++){
+    flowers.push({
+      x:Math.random()*W,y:-30-Math.random()*H*.45,
+      s:13+Math.random()*20,v:1.2+Math.random()*2.2,
+      r:Math.random()*6.28,vr:(Math.random()-.5)*.08,
+      drift:(Math.random()-.5)*.7,
+      g:glyphs[Math.floor(Math.random()*glyphs.length)],
+      a:.55+Math.random()*.4
+    });
+  }
+}
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  ctx.textAlign="center";ctx.textBaseline="middle";
+  for(let i=flowers.length-1;i>=0;i--){
+    const f=flowers[i];f.y+=f.v;f.x+=Math.sin(f.y*.012)*f.drift;f.r+=f.vr;
+    ctx.save();ctx.globalAlpha=f.a;ctx.translate(f.x,f.y);ctx.rotate(f.r);
+    ctx.font=f.s+"px sans-serif";ctx.fillText(f.g,0,0);ctx.restore();
+    if(f.y>H+60)flowers.splice(i,1);
+  }
+  requestAnimationFrame(draw);
+}
+draw();
+
+const lines=[
+  "কিছু কথা সবসময় সরাসরি বলা যায় না…",
+  "তাই আজ কথাগুলো একটু অন্যভাবে বলছি।",
+  "তুমি যদি চাও, তাহলে আমরা শেষ পর্যন্ত যাব।",
+  "একেবারে শেষ পর্যন্ত।"
+];
+
+const intro=document.getElementById("intro");
+const story=document.getElementById("story");
+const text=document.getElementById("text");
+const nums=document.getElementById("nums");
+const bar=document.getElementById("bar");
+
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+async function typeLine(line,index){
+  text.innerHTML="";
+  const span=document.createElement("span");
+  span.className="cursor";text.appendChild(span);
+  for(const ch of line){
+    span.textContent+=ch;
+    await sleep(ch===" " ? 25 : 62);
+  }
+  span.classList.remove("cursor");
+  bar.style.width=((index+1)/lines.length*75)+"%";
+  await sleep(850);
+}
+
+document.getElementById("start").addEventListener("click",async()=>{
+  if(running)return;running=true;
+  intro.style.display="none";story.style.display="flex";
+  rain(120);
+  for(let i=0;i<lines.length;i++)await typeLine(lines[i],i);
+  text.innerHTML="<span>শেষ কথাটার উত্তর তোমার নিজের মতো করে দিও।</span>";
+  bar.style.width="100%";
+  await sleep(900);
+  nums.style.display="flex";
+  rain(150);
+});
+</script>
+</body>
+</html>
